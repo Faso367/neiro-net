@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  nuxt-spa:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nuxt-spa
+    ports:
+      - "80:80"
+      - "443:443"
+      - "3000:3000"
+    expose:
+      - "3000"
+      - "443"
+      - "80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    entrypoint: >
+      sh -c "certbot certonly --webroot --webroot-path=/var/www/certbot
+      --email your-email@example.com --agree-tos --no-eff-email
+      -d starling.steep-man.ru && echo 'Certbot finished!'"
